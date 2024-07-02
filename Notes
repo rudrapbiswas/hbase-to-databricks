@@ -1,0 +1,3 @@
+The ${filename} in the Nifi PutS3Object processor is a placeholder for the name of the file that will be written to S3. Nifi uses Expression Language (EL) to dynamically set property values at runtime, such as filenames, paths, and other configurations.
+
+In the PutS3Object processor, ${filename} will typically be resolved from a FlowFile attribute. However, in this context, it should be more explicit about what the filename will be. Let's update the Nifi flow to generate a unique filename based on the current timestamp or other attributes.
