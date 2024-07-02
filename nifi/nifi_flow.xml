@@ -1,3 +1,27 @@
+<!--
+GetHBase Processor:
+
+Reads data from HBase table UEFA_CHAMPIONS_LEAGUE.
+Connects to ZooKeeper quorum (zookeeper1.example.com,zookeeper2.example.com,zookeeper3.example.com) and client port (2181).
+Fetches columns from team and match column families (team:name, team:country, match:date, match:opponent, match:score).
+Applies a time range filter using ${time.start} and ${time.end}.
+
+UpdateAttribute Processor:
+
+Generates a unique filename (filename) for each flow file using the current timestamp (${now():format('yyyyMMddHHmmss')}.json).
+
+PutS3Object Processor:
+
+Uploads extracted data to AWS S3 bucket league_stand_entries.
+Sets object key (hbase-to-databricks/${filename}) dynamically based on the generated filename.
+Configures AWS credentials (${AWS_ACCESS_KEY_ID}, ${AWS_SECRET_ACCESS_KEY}) and region (us-west-2).
+
+Connections:
+
+GetHBase to UpdateAttribute: Success relationship passes flow files from GetHBase to UpdateAttribute for filename generation.
+UpdateAttribute to PutS3Object: Success relationship passes flow files with generated filenames from UpdateAttribute to PutS3Object for S3 upload.
+-->
+
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <flowController encoding-version="1.2">
     <rootGroup>
