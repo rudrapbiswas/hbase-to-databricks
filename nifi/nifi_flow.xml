@@ -2,91 +2,115 @@
 <flowController encoding-version="1.2">
     <rootGroup>
         <processors>
+            <!-- GetHBase Processor: Reads data from HBase -->
             <processor>
                 <id>1</id>
                 <name>GetHBase</name>
                 <class>org.apache.nifi.hbase.GetHBase</class>
                 <properties>
+                    <!-- Specifies the HBase table to read data from -->
                     <property>
                         <name>Table Name</name>
                         <value>UEFA_CHAMPIONS_LEAGUE</value>
                     </property>
+                    <!-- Specifies the ZooKeeper quorum for HBase -->
                     <property>
                         <name>Zookeeper Quorum</name>
                         <value>zookeeper1.example.com,zookeeper2.example.com,zookeeper3.example.com</value>
                     </property>
+                    <!-- Specifies the ZooKeeper client port for HBase -->
                     <property>
                         <name>Zookeeper Client Port</name>
                         <value>2181</value>
                     </property>
+                    <!-- Specifies the column families to fetch data from -->
                     <property>
                         <name>Column Family</name>
                         <value>team,match</value>
                     </property>
+                    <!-- Specifies the specific columns to fetch within the column families -->
                     <property>
                         <name>Columns</name>
                         <value>team:name,team:country,match:date,match:opponent,match:score</value>
                     </property>
+                    <!-- Specifies the start time for the time range of data to fetch -->
                     <property>
                         <name>Time Range Start</name>
                         <value>${time.start}</value>
                     </property>
+                    <!-- Specifies the end time for the time range of data to fetch -->
                     <property>
                         <name>Time Range End</name>
                         <value>${time.end}</value>
                     </property>
                 </properties>
                 <relationships>
+                    <!-- Relationship indicating successful data retrieval -->
                     <relationship>success</relationship>
                 </relationships>
             </processor>
+            
+            <!-- UpdateAttribute Processor: Generates unique filename -->
             <processor>
                 <id>2</id>
                 <name>UpdateAttribute</name>
                 <class>org.apache.nifi.processors.attributes.UpdateAttribute</class>
                 <properties>
+                    <!-- Generates a unique filename for each flow file -->
                     <property>
                         <name>filename</name>
                         <value>hbase-to-databricks-${now():format('yyyyMMddHHmmss')}.json</value>
                     </property>
                 </properties>
                 <relationships>
+                    <!-- Relationship indicating successful attribute update -->
                     <relationship>success</relationship>
                 </relationships>
             </processor>
+            
+            <!-- PutS3Object Processor: Uploads extracted data to AWS S3 -->
             <processor>
                 <id>3</id>
                 <name>PutS3Object</name>
                 <class>org.apache.nifi.processors.aws.s3.PutS3Object</class>
                 <properties>
+                    <!-- Specifies the AWS access key to authenticate S3 access -->
                     <property>
                         <name>Access Key</name>
                         <value>${AWS_ACCESS_KEY_ID}</value>
                     </property>
+                    <!-- Specifies the AWS secret key to authenticate S3 access -->
                     <property>
                         <name>Secret Key</name>
                         <value>${AWS_SECRET_ACCESS_KEY}</value>
                     </property>
+                    <!-- Specifies the AWS S3 bucket to upload data into -->
                     <property>
                         <name>Bucket</name>
                         <value>league_stand_entries</value>
                     </property>
+                    <!-- Specifies the object key (filename) for the uploaded data -->
                     <property>
                         <name>Object Key</name>
                         <value>hbase-to-databricks/${filename}</value>
                     </property>
+                    <!-- Specifies the AWS region where the S3 bucket resides -->
                     <property>
                         <name>Region</name>
                         <value>us-west-2</value>
                     </property>
                 </properties>
                 <relationships>
+                    <!-- Relationship indicating successful S3 object upload -->
                     <relationship>success</relationship>
+                    <!-- Relationship indicating failure during S3 object upload -->
                     <relationship>failure</relationship>
                 </relationships>
             </processor>
         </processors>
+        
         <connections>
+            <!-- Connection: GetHBase to UpdateAttribute -->
             <connection>
                 <id>1-2</id>
                 <source>
@@ -97,8 +121,11 @@
                     <id>2</id>
                     <name>UpdateAttribute</name>
                 </destination>
+                <!-- Specifies the relationship to trigger when data is successfully fetched from HBase -->
                 <relationship>success</relationship>
             </connection>
+            
+            <!-- Connection: UpdateAttribute to PutS3Object -->
             <connection>
                 <id>2-3</id>
                 <source>
@@ -109,6 +136,7 @@
                     <id>3</id>
                     <name>PutS3Object</name>
                 </destination>
+                <!-- Specifies the relationship to trigger when filename is successfully updated -->
                 <relationship>success</relationship>
             </connection>
         </connections>
