@@ -1,0 +1,4 @@
+<!-- Example Nifi flow configuration -->
+<flow>
+  <!-- Your Nifi processors and connections go here -->
+</flow>
