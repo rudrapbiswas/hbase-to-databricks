@@ -42,6 +42,20 @@
             </processor>
             <processor>
                 <id>2</id>
+                <name>UpdateAttribute</name>
+                <class>org.apache.nifi.processors.attributes.UpdateAttribute</class>
+                <properties>
+                    <property>
+                        <name>filename</name>
+                        <value>hbase-to-databricks-${now():format('yyyyMMddHHmmss')}.json</value>
+                    </property>
+                </properties>
+                <relationships>
+                    <relationship>success</relationship>
+                </relationships>
+            </processor>
+            <processor>
+                <id>3</id>
                 <name>PutS3Object</name>
                 <class>org.apache.nifi.processors.aws.s3.PutS3Object</class>
                 <properties>
@@ -81,6 +95,18 @@
                 </source>
                 <destination>
                     <id>2</id>
+                    <name>UpdateAttribute</name>
+                </destination>
+                <relationship>success</relationship>
+            </connection>
+            <connection>
+                <id>2-3</id>
+                <source>
+                    <id>2</id>
+                    <name>UpdateAttribute</name>
+                </source>
+                <destination>
+                    <id>3</id>
                     <name>PutS3Object</name>
                 </destination>
                 <relationship>success</relationship>
