@@ -1,4 +1,90 @@
-<!-- Example Nifi flow configuration -->
-<flow>
-  <!-- Your Nifi processors and connections go here -->
-</flow>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<flowController encoding-version="1.2">
+    <rootGroup>
+        <processors>
+            <processor>
+                <id>1</id>
+                <name>GetHBase</name>
+                <class>org.apache.nifi.hbase.GetHBase</class>
+                <properties>
+                    <property>
+                        <name>Table Name</name>
+                        <value>UEFA_CHAMPIONS_LEAGUE</value>
+                    </property>
+                    <property>
+                        <name>Zookeeper Quorum</name>
+                        <value>zookeeper1.example.com,zookeeper2.example.com,zookeeper3.example.com</value>
+                    </property>
+                    <property>
+                        <name>Zookeeper Client Port</name>
+                        <value>2181</value>
+                    </property>
+                    <property>
+                        <name>Column Family</name>
+                        <value>team,match</value>
+                    </property>
+                    <property>
+                        <name>Columns</name>
+                        <value>team:name,team:country,match:date,match:opponent,match:score</value>
+                    </property>
+                    <property>
+                        <name>Time Range Start</name>
+                        <value>${time.start}</value>
+                    </property>
+                    <property>
+                        <name>Time Range End</name>
+                        <value>${time.end}</value>
+                    </property>
+                </properties>
+                <relationships>
+                    <relationship>success</relationship>
+                </relationships>
+            </processor>
+            <processor>
+                <id>2</id>
+                <name>PutS3Object</name>
+                <class>org.apache.nifi.processors.aws.s3.PutS3Object</class>
+                <properties>
+                    <property>
+                        <name>Access Key</name>
+                        <value>${AWS_ACCESS_KEY_ID}</value>
+                    </property>
+                    <property>
+                        <name>Secret Key</name>
+                        <value>${AWS_SECRET_ACCESS_KEY}</value>
+                    </property>
+                    <property>
+                        <name>Bucket</name>
+                        <value>league_stand_entries</value>
+                    </property>
+                    <property>
+                        <name>Object Key</name>
+                        <value>hbase-to-databricks/${filename}</value>
+                    </property>
+                    <property>
+                        <name>Region</name>
+                        <value>us-west-2</value>
+                    </property>
+                </properties>
+                <relationships>
+                    <relationship>success</relationship>
+                    <relationship>failure</relationship>
+                </relationships>
+            </processor>
+        </processors>
+        <connections>
+            <connection>
+                <id>1-2</id>
+                <source>
+                    <id>1</id>
+                    <name>GetHBase</name>
+                </source>
+                <destination>
+                    <id>2</id>
+                    <name>PutS3Object</name>
+                </destination>
+                <relationship>success</relationship>
+            </connection>
+        </connections>
+    </rootGroup>
+</flowController>
