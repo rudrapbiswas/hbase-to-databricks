@@ -8,7 +8,9 @@ This project demonstrates how to efficiently transfer data from HBase/Phoenix to
 ## Database/Connection details
 
 HBase Table: UEFA_CHAMPIONS_LEAGUE
+
 Column Family: team
+
 Qualifiers: name, country
 Column Family: match
 Qualifiers: date, opponent, score
