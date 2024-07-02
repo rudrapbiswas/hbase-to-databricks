@@ -16,7 +16,7 @@ hbase-to-databricks/
 ├── README.md
 └── .gitignore
 
-# Prerequisites
+## Prerequisites
 
 Apache Nifi
 Apache Spark
